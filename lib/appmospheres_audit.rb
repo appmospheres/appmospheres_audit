@@ -43,7 +43,7 @@ module AppmospheresAudit
 
     def track_update
       begin
-        EventLog.create!(:event_type => self.class.to_s, :action => "update", :payload => self.changes.to_yaml)
+        EventLog.create!(:event_type => self.class.to_s, :action => "update", :payload => self.changes.merge({:id => self.id}).to_yaml)
       rescue
         Rails.logger.warn "Could not log event 'update' for #{self.class.to_s}:#{self.changes.inspect}" rescue true
       end
