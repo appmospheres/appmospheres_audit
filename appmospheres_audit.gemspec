@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version     = AppmospheresAudit::VERSION
   s.authors     = ["eugen neagoe", "Koen Handekyn"]
   s.email       = ["eugen.neagoe@appmospheres.com", "koen.handekyn@appmospheres.com"]
-  s.homepage    = "https://bitbucket.org/appmospheres/appmospheres_audit"
+  s.homepage    = "https://github.com/appmospheres/appmospheres_audit"
   s.summary     = %q{A gem for tracking record changes and controller actions}
   s.description = %q{A gem for tracking record changes and controller actions}
 

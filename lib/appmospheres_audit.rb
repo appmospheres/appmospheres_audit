@@ -6,6 +6,28 @@ require "appmospheres_audit/event_log"
 
 module AppmospheresAudit
 
+  def self.configure
+    yield(self) if block_given?
+  end
+
+  class << self
+
+    # stores a hash of options given to the +configure+ block.
+    def options
+      @options ||= {}
+    end
+
+    # set or get the configuration parameters
+    def method_missing(symbol, *args)
+      if (method = symbol.to_s).sub!(/\=$/, '')
+        options[method.to_sym] = args.first
+      else
+        options[method.to_sym]
+      end
+    end
+
+  end
+
   module SupportTrail
 
     def log_exception(ex)
@@ -43,7 +65,9 @@ module AppmospheresAudit
 
     def track_update
       begin
-        EventLog.create!(:event_type => self.class.to_s, :action => "update", :payload => self.changes.merge({:id => self.id}).to_yaml)
+        filtered_params = Rails.application.config.filter_parameters + (AppmospheresAudit.filter_parameters || [])
+        EventLog.create!(:event_type => self.class.to_s, :action => "update",
+          :payload => self.changes.merge({:id => self.id}).except(*filtered_params).to_yaml)
       rescue
         Rails.logger.warn "Could not log event 'update' for #{self.class.to_s}:#{self.changes.inspect}" rescue true
       end
@@ -51,7 +75,8 @@ module AppmospheresAudit
 
     def track_destroy
       begin
-        EventLog.create!(:event_type => self.class.to_s, :action => "destroy", :payload => self.to_yaml)
+        filtered_params = Rails.application.config.filter_parameters + (AppmospheresAudit.filter_parameters || [])
+        EventLog.create!(:event_type => self.class.to_s, :action => "destroy", :payload => self.serializable_hash.except(*filtered_params.map(&:to_s)).to_yaml)
       rescue
         Rails.logger.warn "Could not log event 'destroy' for #{self.class.to_s}:#{self.inspect}" rescue true
       end
@@ -72,7 +97,12 @@ module AppmospheresAudit
         around_filter do |controller, action|
           begin
             begin
-              EventLog.create!(:event_type => 'controller', :action => controller.request.parameters[:action], :payload => controller.request.parameters.to_yaml)
+              filtered_actions = AppmospheresAudit.filter_actions || []
+              unless filtered_actions.include?(controller.action_name.to_sym) || filtered_actions.include?(controller.action_name)
+                filtered_params = Rails.application.config.filter_parameters + (AppmospheresAudit.filter_parameters || [])
+                EventLog.create!(:event_type => 'controller', :action => controller.request.parameters[:action],
+                  :payload => controller.request.parameters.except(*filtered_params).to_yaml)
+              end
             rescue
               Rails.logger.warn "tracked #{controller.request.parameters.inspect}" rescue nil
             end

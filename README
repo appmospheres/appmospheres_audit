@@ -1,1 +1,24 @@
 A gem for tracking model changes and controller actions.
+
+USAGE
+Run 'rails generate appmospheres_audit:migration' to generate the migration for the log events.
+Run 'rails sappmospheres_audit:config' to generate a configuration initializer (in config/initializers/appmospheres_audit.rb).
+
+Track models with enable_record_tracking:
+class User < ActiveRecord::Base
+  enable_record_tracking
+  ...
+end
+
+Track actions with enable_action_tracking:
+class MyController < ApplicationController
+  enable_action_tracking
+  ...
+end
+
+The payload of any event log record will be a YAML string. An event log tracking a model will record:
+* on create: ID of the newly created record
+* on update: list of changes (keys and values), excluding those explicitely filtered by setting Rails.application.config.filter_parameters and/or AppmospheresAudit.filter_parameters.
+* on destroy: serialized record, excluding the attributes filtered by setting Rails.application.config.filter_parameters and/or AppmospheresAudit.filter_parameters.
+
+Tracking actions in a controller will create an event log record with the name of the action and the parameters passed to the action, except those filtered by setting Rails.application.config.filter_parameters and/or AppmospheresAudit.filter_parameters.

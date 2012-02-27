@@ -8,6 +8,11 @@ describe AppmospheresAudit::ControllerTrail do
       expect { get '/users' }.to change(EventLog, :count).by(1)
     end
 
+    it "should not track filtered actions" do
+      AppmospheresAudit.filter_actions = [:index]
+      expect { get '/users' }.not_to change(EventLog, :count)
+    end
+
   end
 
 end

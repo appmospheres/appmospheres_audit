@@ -15,7 +15,7 @@ describe AppmospheresAudit::MigrationGenerator do
 
   describe 'no arguments' do
 
-    before { run_generator  }
+    before { run_generator }
 
     describe 'db/migrate/appmospheres_audit_migration.rb' do
       subject { file('db/migrate/appmospheres_audit_migration.rb') }

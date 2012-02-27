@@ -3,3 +3,6 @@ First release.
 
 == 0.1.1
 Also track ID of the changed record on update.
+
+== 0.1.2
+Added configuration options - it can filter out parameters/attributes and actions before logging.
